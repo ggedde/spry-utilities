@@ -6,9 +6,7 @@ use Spry\Spry;
 
 class SpryUtilities {
 
-
-
-    public static function get_api_response($request='', $url='')
+    public static function getRemoteResponse($url='', $request='')
 	{
 		if(!empty($request))
 		{
@@ -101,6 +99,17 @@ class SpryUtilities {
 
 
 
+    /**
+	 * Extracts the Value from a multi-dementional array by string
+     * format using "." as the array separator.
+	 *
+ 	 * @param array $key_path
+ 	 * @param array $array
+ 	 *
+ 	 * @access 'public'
+ 	 * @return mixed
+	 */
+
     public static function extractKeyValue($key_path='', $array=[])
     {
         $path = explode('.', $key_path);
@@ -122,4 +131,191 @@ class SpryUtilities {
 
         return $param_value;
     }
+
+
+
+    /**
+	 * Runs a test through the Remote Response
+	 *
+ 	 * @param array $test
+ 	 *
+ 	 * @access 'public'
+ 	 * @return mixed
+	 */
+
+    public static function test($test='')
+	{
+		$response_code = 2050;
+
+        $result = [];
+
+        if(is_string($test))
+        {
+            if(empty(Spry::config()->tests))
+    		{
+    			Spry::stop(5052);
+    		}
+
+            if(!isset(Spry::config()->tests[$test]))
+            {
+                return Spry::response(5053, null);
+            }
+
+            $test = Spry::config()->tests[$test];
+        }
+
+		$result = [
+            'status' => 'Passed',
+            'params' => $test['params'],
+            'expect' => [],
+            'result' => [],
+        ];
+
+		$response = self::getRemoteResponse(json_encode($test['params']), Spry::config()->endpoint.$test['route']);
+		$response = json_decode($response, true);
+
+        $result['full_response'] = $response;
+
+		if(!empty($test['expect']) && is_array($test['expect']))
+		{
+			$result['result'] = [];
+
+            if(empty($test['expect']))
+            {
+                $result['status'] = 'Failed';
+                $response_code = 5050;
+            }
+            else
+            {
+                $result['expect'] = $test['expect'];
+
+                foreach ($test['expect'] as $expect_key => $expect)
+				{
+                    $expect_path = $expect_key;
+                    $expect_compare = '=';
+
+                    $comparisons = ['<=','>=','=<','=>','<','>','!==','===','!=','==','!','='];
+
+                    foreach($comparisons as $compare_key => $compare_value)
+                    {
+                        if($pos = strrpos($expect_key, '['.$compare_value.']'))
+                        {
+                            $expect_path = rtrim(substr($expect_key, 0, $pos));
+                            $expect_compare = trim(str_replace(['[',']'], '', $compare_value));
+                            break;
+                        }
+                        else if($pos = strrpos($expect_key, $compare_value))
+                        {
+                            $expect_path = rtrim(substr($expect_key, 0, $pos));
+                            $expect_compare = trim($compare_value);
+                            break;
+                        }
+                    }
+
+                    $response_value = self::extractKeyValue($expect_path, $response);
+
+                    $result['result'][$expect_path] = $response_value;
+
+					if(is_null($response_value))
+					{
+                        $result['status'] = 'Failed';
+						$response_code = 5050;
+					}
+
+                    if($expect_compare && !is_null($response_value))
+                    {
+                        switch($expect_compare)
+                        {
+                            case '!==':
+
+                                if($response_value === $expect)
+                                {
+                                    $result['status'] = 'Failed';
+            						$response_code = 5050;
+                                }
+
+                            break;
+
+                            case '!=':
+                            case '!':
+
+                                if($response_value == $expect)
+                                {
+                                    $result['status'] = 'Failed';
+            						$response_code = 5050;
+                                }
+
+                            break;
+
+                            case '<=':
+                            case '=<':
+
+                                if($response_value > $expect)
+                                {
+                                    $result['status'] = 'Failed';
+            						$response_code = 5050;
+                                }
+
+                            break;
+
+                            case '>=':
+                            case '=>':
+
+                                if($response_value < $expect)
+                                {
+                                    $result['status'] = 'Failed';
+            						$response_code = 5050;
+                                }
+
+                            break;
+
+                            case '<':
+
+                                if($response_value >= $expect)
+                                {
+                                    $result['status'] = 'Failed';
+            						$response_code = 5050;
+                                }
+
+                            break;
+
+                            case '>':
+
+                                if($response_value <= $expect)
+                                {
+                                    $result['status'] = 'Failed';
+            						$response_code = 5050;
+                                }
+
+                            break;
+
+                            case '==':
+                            case '=':
+
+                                if($response_value != $expect)
+                                {
+                                    $result['status'] = 'Failed';
+            						$response_code = 5050;
+                                }
+
+                            break;
+
+                            case '===':
+                            default:
+
+                                if($response_value !== $expect)
+                                {
+                                    $result['status'] = 'Failed';
+            						$response_code = 5050;
+                                }
+
+                            break;
+                        }
+                    }
+				}
+            }
+		}
+
+		return Spry::response($response_code, $result);
+	}
 }
