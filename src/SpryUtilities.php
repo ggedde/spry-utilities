@@ -1,6 +1,6 @@
 <?php
 
-namespace Spry\SpryUtilities;
+namespace Spry;
 
 use Spry\Spry;
 
