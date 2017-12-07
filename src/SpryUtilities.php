@@ -75,7 +75,7 @@ class SpryUtilities {
  	 * @return array
 	 */
 
-    public static function db_migrate($args=[])
+    public static function dbMigrate($args=[])
 	{
         if(empty(Spry::config()))
         {
@@ -96,6 +96,29 @@ class SpryUtilities {
 
 		return Spry::response(30, $logs);
 	}
+
+
+
+    /**
+	 * Gets the SQL Order from the API Request.
+     * Can specify Allowed fields to order by.
+	 *
+ 	 * @param array $allowed_fields
+ 	 *
+ 	 * @access 'public'
+ 	 * @return array
+	 */
+
+    public static function dbGetOrder($allowed_fields=['id'])
+    {
+        $order = Spry::validator()->validate('order');
+		$orderby = Spry::validator()->validate('orderby');
+
+		$order = (is_string($order) && in_array($order, ['DESC', 'ASC']) ? $order : 'DESC');
+		$orderby = (is_string($orderby) && is_array($allowed_fields) && in_array($orderby, $allowed_fields) ? $orderby : 'id');
+
+		return [$orderby => $order];
+    }
 
 
 
