@@ -1,6 +1,6 @@
 {
     "name": "ggedde/spry-utilities",
-    "description": "A set of functions to help speed up development",
+    "description": "A set of functions to help speed up development for Spry",
     "type": "SpryUtilities",
     "require": {
         "php": ">=5.4.0"
