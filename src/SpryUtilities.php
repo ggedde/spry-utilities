@@ -118,6 +118,23 @@ class SpryUtilities {
 
 		if(is_array($allowed_fields))
 		{
+			if(!in_array($orderby, $allowed_fields))
+			{
+				foreach ($allowed_fields as $field)
+				{
+					if(stripos($field, '.'))
+					{
+						$split = explode('.', $field);
+
+						if(!empty($split[1]) && $split[1] === $orderby)
+						{
+							$orderby = $split[0].'.'.$split[1];
+							break;
+						}
+					}
+				}
+			}
+
 			$first = $allowed_fields[0];
 		}
 
