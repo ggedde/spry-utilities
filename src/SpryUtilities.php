@@ -114,8 +114,15 @@ class SpryUtilities {
         $order = Spry::validator()->validate('order');
 		$orderby = Spry::validator()->validate('orderby');
 
+		$first = 'id';
+
+		if(is_array($allowed_fields))
+		{
+			$first = $allowed_fields[0];
+		}
+
 		$order = (is_string($order) && in_array($order, ['DESC', 'ASC']) ? $order : 'DESC');
-		$orderby = (is_string($orderby) && is_array($allowed_fields) && in_array($orderby, $allowed_fields) ? $orderby : 'id');
+		$orderby = (is_string($orderby) && is_array($allowed_fields) && in_array($orderby, $allowed_fields) ? $orderby : $first);
 
 		return [$orderby => $order];
     }
