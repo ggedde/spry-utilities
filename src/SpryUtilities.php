@@ -66,6 +66,62 @@ class SpryUtilities {
 
 
 
+	/**
+     * Returns the Singlular version of the string.
+     *
+     * @param string $string
+     *
+     * @access 'public'
+     * @return string
+     */
+
+    public static function single($string)
+    {
+		if(!$string || !is_string($string) || !trim($string) || stripos(substr(trim($string), -1), 's') === false)
+		return $string;
+
+		$string = trim($string);
+
+		if(stripos(substr($string, -3), 'ies') !== false)
+		return substr($string, 0, -3) . (ctype_upper($string) ? 'Y' : 'y');
+
+		if(stripos(substr($string, -3), 'ses') !== false)
+		return substr($string, 0, -2);
+
+		if(stripos(substr($string, -1), 's') !== false)
+		return substr($string, 0, -1);
+
+		return $string;
+    }
+
+
+
+
+
+		/**
+	     * Returns the Plural version of the string.
+	     *
+	     * @param string $string
+	     *
+	     * @access 'public'
+	     * @return string
+	     */
+
+	    public static function plural($string)
+	    {
+			if(!$string || !is_string($string) || !trim($string) || stripos(substr(trim($string), -1), 's') !== false)
+			return $string;
+
+			$string = trim($string);
+
+			if(stripos(substr($string, -1), 'y') !== false)
+			return substr($string, 0, -1) . (ctype_upper($string) ? 'IES' : 'ies');
+
+			return $string . (ctype_upper($string) ? 'S' : 's');
+	    }
+
+
+
     /**
 	 * Migrates the Database Scheme based on the configuration.
 	 *
