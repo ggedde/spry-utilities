@@ -274,7 +274,7 @@ class SpryUtilities {
             'result' => [],
         ];
 
-		$response = self::getRemoteResponse(Spry::config()->endpoint.$test['route'], json_encode($test['params']));
+		$response = self::getRemoteResponse(Spry::config()->endpoint.$test['route'], json_encode(array_merge($test['params'], ['test_data' => 1])));
 		$response = json_decode($response, true);
 
         $result['full_response'] = $response;
