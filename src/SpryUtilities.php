@@ -6,7 +6,35 @@ use Spry\Spry;
 
 class SpryUtilities {
 
-    public static function getRemoteResponse($url='', $request='')
+
+
+	/**
+	 * Creates a random unique key.
+	 *
+	 * @param string $salt
+	 *
+	 * @access 'public'
+	 * @return string
+	 */
+
+	public static function getRandomKey($salt='')
+	{
+		return md5(uniqid(rand(), true) . $salt);
+	}
+
+
+
+	/**
+	 * Runs a remote request.
+	 *
+ 	 * @param string $url
+ 	 * @param array $request
+ 	 *
+ 	 * @access 'public'
+ 	 * @return string
+	 */
+
+    public static function getRemoteResponse($url='', $request='', $headers=[])
 	{
 		if(!empty($request))
 		{
@@ -17,6 +45,11 @@ class SpryUtilities {
 			curl_setopt($ch, CURLOPT_HEADER, FALSE);
 			curl_setopt($ch, CURLOPT_POST, TRUE);
 			curl_setopt($ch, CURLOPT_POSTFIELDS, $request);
+
+			if(!empty($headers))
+			{
+				curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+			}
 
 			$response = curl_exec($ch);
 			curl_close($ch);
@@ -274,7 +307,12 @@ class SpryUtilities {
             'result' => [],
         ];
 
-		$response = self::getRemoteResponse(Spry::config()->endpoint.$test['route'], json_encode(array_merge($test['params'], ['test_data' => 1])));
+		$response = self::getRemoteResponse(
+			Spry::config()->endpoint.$test['route'],
+			json_encode(array_merge($test['params'], ['test_data' => 1])),
+			(!empty($test['headers']) ? $test['headers'] : false)
+		);
+
 		$response = json_decode($response, true);
 
         $result['full_response'] = $response;
