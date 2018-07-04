@@ -303,6 +303,7 @@ class SpryUtilities {
 		$result = [
             'status' => 'Passed',
             'params' => $test['params'],
+            'headers' => (!empty($test['headers']) ? $test['headers'] : []),
             'expect' => [],
             'result' => [],
         ];
