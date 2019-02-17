@@ -34,17 +34,28 @@ class SpryUtilities {
  	 * @return string
 	 */
 
-    public static function getRemoteResponse($url='', $request='', $headers=[])
+    public static function getRemoteResponse($url='', $request='', $headers=[], $method='POST')
 	{
+        $method = trim(strtoupper($method));
+
 		if(!empty($request))
 		{
-			$ch = curl_init();
+            $ch = curl_init();
+            
+            if($method === 'GET')
+            {
+                $url.= '?'.http_build_query($request);
+            }
 
 			curl_setopt($ch, CURLOPT_URL, $url);
+			curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $method);
 			curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
-			curl_setopt($ch, CURLOPT_HEADER, FALSE);
-			curl_setopt($ch, CURLOPT_POST, TRUE);
-			curl_setopt($ch, CURLOPT_POSTFIELDS, $request);
+            curl_setopt($ch, CURLOPT_HEADER, FALSE);
+
+            if($method !== 'GET')
+            {
+                curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($request));
+            }
 
 			if(!empty($headers))
 			{
@@ -300,18 +311,22 @@ class SpryUtilities {
             $test = Spry::config()->tests[$test];
         }
 
+        $method = (!empty($test['method']) ? trim(strtoupper($test['method'])) : 'POST');
+
 		$result = [
             'status' => 'Passed',
             'params' => $test['params'],
             'headers' => (!empty($test['headers']) ? $test['headers'] : []),
+            'method' => $method,
             'expect' => [],
             'result' => [],
         ];
 
 		$response = self::getRemoteResponse(
 			Spry::config()->endpoint.$test['route'],
-			json_encode(array_merge($test['params'], ['test_data' => 1])),
-			(!empty($test['headers']) ? $test['headers'] : false)
+			array_merge($test['params'], ['test_data' => 1]),
+			(!empty($test['headers']) ? $test['headers'] : false),
+			$method
 		);
 
 		$response = json_decode($response, true);
