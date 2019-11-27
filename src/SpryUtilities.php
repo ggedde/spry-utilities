@@ -8,6 +8,7 @@
 namespace Spry;
 
 use Spry\Spry;
+use stdClass;
 
 /**
  * Utility Functions for Spry Compononents
@@ -227,9 +228,41 @@ class SpryUtilities
             }
         }
 
-        $where['ORDERBY'] = self::dbGetOrder($allowedOrderFields);
+        $where['ORDER'] = self::dbGetOrder($allowedOrderFields);
 
         return $where;
+    }
+    /**
+     * Creates a random unique key.
+     *
+     * @param array $params
+     * @param array $total
+     * @param array $searchTotal
+     *
+     * @access public
+     *
+     * @return array
+     */
+    public static function dbGetPagination($params, $total, $searchTotal)
+    {
+        $pagination = new stdClass();
+        $pagination->page = !empty($params['pagination_page']) ? $params['pagination_page'] : 1;
+        $pagination->pageLimit = !empty($params['pagination_page_limit']) ? $params['pagination_page_limit'] : 10;
+        $pagination->minimum = !empty($params['pagination_minimum']) ? $params['pagination_minimum'] : 1000;
+
+        $pagination->limit = null;
+        if ($searchTotal && $searchTotal > $pagination->minimum) {
+            $pagination->limit = [(($pagination->page - 1) * $pagination->pageLimit), $pagination->pageLimit];
+        }
+
+        $pagination->meta = [
+            'total' => $total,
+            'search_total' => $searchTotal,
+            'page' => $pagination->page,
+            'page_limit' => $pagination->pageLimit,
+        ];
+
+        return $pagination;
     }
 
 
