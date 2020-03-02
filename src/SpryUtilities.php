@@ -250,10 +250,10 @@ class SpryUtilities
         $pagination = new stdClass();
         $pagination->page = !empty($params['pagination_page']) ? $params['pagination_page'] : 1;
         $pagination->pageLimit = !empty($params['pagination_page_limit']) ? $params['pagination_page_limit'] : 10;
-        $pagination->minimum = !empty($params['pagination_minimum']) ? $params['pagination_minimum'] : 1000;
+        $pagination->count = !empty($params['pagination_count']) ? $params['pagination_count'] : 1000;
 
         $pagination->limit = null;
-        if ($searchTotal && $searchTotal > $pagination->minimum) {
+        if ($searchTotal && $searchTotal > $pagination->count) {
             $pagination->limit = [(($pagination->page - 1) * $pagination->pageLimit), $pagination->pageLimit];
         }
 
