@@ -83,12 +83,13 @@ class SpryUtilities
      * Creates a one way Hash value used for Passwords and other authentication.
      *
      * @param string $value
+     * @param bool   $skipInitialHash
      *
      * @access public
      *
      * @return string
      */
-    public static function hash($value = '')
+    public static function hash($value = '', $skipInitialHash = false)
     {
         $salt = '';
 
@@ -96,7 +97,17 @@ class SpryUtilities
             $salt = Spry::config()->salt;
         }
 
-        return md5(serialize($value).$salt);
+        if ($value && !is_string($value)) {
+            $value = serialize($value);
+        }
+
+        if (!$skipInitialHash) {
+            $value = hash('sha256', $value);
+        }
+
+        $value = hash('sha256', serialize($value).$salt);
+
+        return $value;
     }
 
 
