@@ -8,13 +8,13 @@
 namespace Spry;
 
 use Spry\Spry;
-use stdClass;
 
 /**
  * Utility Functions for Spry Compononents
  */
 class SpryUtilities
 {
+
 
     /**
      * Creates a random unique key.
@@ -200,20 +200,20 @@ class SpryUtilities
     public static function dbMigrate($args = [])
     {
         if (empty(Spry::config())) {
-            return Spry::response(0, 1);
+            return Spry::response(1);
         }
 
         if (empty(Spry::config()->db['username']) || empty(Spry::config()->db['database_name'])) {
-            return Spry::response(0, 32);
+            return Spry::response(32);
         }
 
         if (empty(Spry::config()->dbProvider) || !class_exists(Spry::config()->dbProvider)) {
-            return Spry::response(0, 33);
+            return Spry::response(33);
         }
 
         $logs = Spry::db()->migrate($args);
 
-        return Spry::response(0, 30, $logs);
+        return Spry::response(30, $logs);
     }
 
 
@@ -221,34 +221,55 @@ class SpryUtilities
     /**
      * Creates a random unique key.
      *
-     * @param array $params
-     * @param array $allowedOrderFields
-     * @param array $configFields
+     * @param string $table
+     * @param array  $params
+     * @param array  $meta
+     * @param array  $searchFields
      *
      * @access public
      *
      * @return array
      */
-    public static function dbPrepareWhere($params = [], $allowedOrderFields = ['id'], $configFields = [])
+    public static function dbPrepareSelect($table, $params = null, $meta = [], $searchFields = [], $dbMeta = [])
     {
         $where = [];
+        $responseMeta = [];
 
-        if (!empty($params)) {
-            foreach ($params as $key => $value) {
-                if (!in_array($key, $configFields)) {
-                    $where[$key] = $value;
-                }
-            }
+        // Get Multiple - Set Default Totals
+        $total = $searchTotal = Spry::db($dbMeta)->count($table, 'id', $params);
+
+        // If has Orderby then set Order
+        if (!empty($meta['orderby']) && !empty($meta['order'])) {
+            $where['ORDER'] = [$meta['orderby'] => $meta['order']];
         }
 
-        $where['ORDER'] = self::dbGetOrder($allowedOrderFields);
+        // If has Search then set Search Parameter and Fields to search on
+        if (!empty($meta['search']) && !empty($searchFields)) {
+            $where['OR'] = [];
+            foreach ($searchFields as $searchField) {
+                $where['OR'][$searchField.'[~]'] = $meta['search'];
+            }
+            $searchTotal = Spry::db($dbMeta)->count($table, 'id', $where);
+        }
 
-        return $where;
+        $pagination = self::dbGetPagination($meta, $total, $searchTotal);
+
+        if (!empty($pagination->limit)) {
+            $where['LIMIT'] = $pagination->limit;
+            $responseMeta = [
+                'pagination' => $pagination->meta,
+            ];
+        }
+
+        return (object) ['where' => $where, 'meta' => $responseMeta, 'total' => $total, 'search_total' => $searchTotal];
     }
+
+
+
     /**
      * Creates a random unique key.
      *
-     * @param array $params
+     * @param array $meta
      * @param array $total
      * @param array $searchTotal
      *
@@ -256,12 +277,12 @@ class SpryUtilities
      *
      * @return array
      */
-    public static function dbGetPagination($params, $total, $searchTotal)
+    public static function dbGetPagination($meta, $total, $searchTotal)
     {
-        $pagination = new stdClass();
-        $pagination->page = !empty($params['pagination_page']) ? $params['pagination_page'] : 1;
-        $pagination->pageLimit = !empty($params['pagination_page_limit']) ? $params['pagination_page_limit'] : 10;
-        $pagination->count = !empty($params['pagination_count']) ? $params['pagination_count'] : 1000;
+        $pagination = (object) [];
+        $pagination->page = !empty($meta['pagination_page']) ? $meta['pagination_page'] : 1;
+        $pagination->pageLimit = !empty($meta['pagination_page_limit']) ? $meta['pagination_page_limit'] : 10;
+        $pagination->count = !empty($meta['pagination_count']) ? $meta['pagination_count'] : 1000;
 
         $pagination->limit = null;
         if ($searchTotal && $searchTotal > $pagination->count) {
@@ -276,48 +297,6 @@ class SpryUtilities
         ];
 
         return $pagination;
-    }
-
-
-
-    /**
-     * Gets the SQL Order from the API Request.
-     * Can specify Allowed fields to order by.
-     *
-     * @param array $allowedFields
-     *
-     * @access public
-     *
-     * @return array
-     */
-    public static function dbGetOrder($allowedFields = ['id'])
-    {
-        $order = Spry::validator()->validate('order');
-        $orderby = Spry::validator()->validate('orderby');
-
-        $first = 'id';
-
-        if (is_array($allowedFields)) {
-            if (!in_array($orderby, $allowedFields)) {
-                foreach ($allowedFields as $field) {
-                    if (stripos($field, '.')) {
-                        $split = explode('.', $field);
-
-                        if (!empty($split[1]) && $split[1] === $orderby) {
-                            $orderby = $split[0].'.'.$split[1];
-                            break;
-                        }
-                    }
-                }
-            }
-
-            $first = $allowedFields[0];
-        }
-
-        $order = (is_string($order) && in_array($order, ['DESC', 'ASC']) ? $order : 'DESC');
-        $orderby = (is_string($orderby) && is_array($allowedFields) && in_array($orderby, $allowedFields) ? $orderby : $first);
-
-        return [$orderby => $order];
     }
 
 
@@ -374,7 +353,7 @@ class SpryUtilities
             }
 
             if (!isset(Spry::config()->tests[$test])) {
-                return Spry::response(0, 53);
+                return Spry::response(53);
             }
 
             $test = Spry::config()->tests[$test];
@@ -514,6 +493,6 @@ class SpryUtilities
             }
         }
 
-        return Spry::response(0, $responseCode, $result);
+        return Spry::response($responseCode, $result);
     }
 }
