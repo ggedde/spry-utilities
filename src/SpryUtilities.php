@@ -225,6 +225,7 @@ class SpryUtilities
      * @param array  $params
      * @param array  $meta
      * @param array  $searchFields
+     * @param array  $dbMeta
      *
      * @access public
      *
