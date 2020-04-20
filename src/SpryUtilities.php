@@ -219,10 +219,11 @@ class SpryUtilities
 
 
     /**
-     * Creates a random unique key.
+     * Prepares the Select Statment using meta fields for Search, Pagination, etc..
      *
      * @param string $table
-     * @param array  $params
+     * @param array  $join
+     * @param array  $where
      * @param array  $meta
      * @param array  $searchFields
      * @param array  $dbMeta
@@ -231,13 +232,12 @@ class SpryUtilities
      *
      * @return array
      */
-    public static function dbPrepareSelect($table, $params = null, $meta = [], $searchFields = [], $dbMeta = [])
+    public static function dbPrepareSelect($table, $join = null, $where = [], $meta = [], $searchFields = [], $dbMeta = [])
     {
-        $where = [];
         $responseMeta = [];
 
         // Get Multiple - Set Default Totals
-        $total = $searchTotal = Spry::db($dbMeta)->count($table, 'id', $params);
+        $total = $searchTotal = Spry::db($dbMeta)->count($table, $join, 'id', $where);
 
         // If has Orderby then set Order
         if (!empty($meta['orderby']) && !empty($meta['order'])) {
@@ -250,7 +250,7 @@ class SpryUtilities
             foreach ($searchFields as $searchField) {
                 $where['OR'][$searchField.'[~]'] = $meta['search'];
             }
-            $searchTotal = Spry::db($dbMeta)->count($table, 'id', $where);
+            $searchTotal = Spry::db($dbMeta)->count($table, $join, 'id', $where);
         }
 
         $pagination = self::dbGetPagination($meta, $total, $searchTotal);
@@ -268,7 +268,7 @@ class SpryUtilities
 
 
     /**
-     * Creates a random unique key.
+     * Creates the Pagination object.
      *
      * @param array $meta
      * @param array $total
