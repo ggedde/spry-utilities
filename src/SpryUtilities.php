@@ -200,20 +200,20 @@ class SpryUtilities
     public static function dbMigrate($args = [])
     {
         if (empty(Spry::config())) {
-            return Spry::response(1);
+            return Spry::response(null, 1);
         }
 
         if (empty(Spry::config()->db['username']) || empty(Spry::config()->db['database_name'])) {
-            return Spry::response(32);
+            return Spry::response(null, 32);
         }
 
         if (empty(Spry::config()->dbProvider) || !class_exists(Spry::config()->dbProvider)) {
-            return Spry::response(33);
+            return Spry::response(null, 33);
         }
 
         $logs = Spry::db()->migrate($args);
 
-        return Spry::response(30, $logs);
+        return Spry::response(null, 30, null, null, $logs);
     }
 
 
@@ -350,11 +350,11 @@ class SpryUtilities
 
         if (is_string($test)) {
             if (empty(Spry::config()->tests)) {
-                Spry::stop(552);
+                Spry::stop(52);
             }
 
             if (!isset(Spry::config()->tests[$test])) {
-                return Spry::response(53);
+                Spry::stop(53);
             }
 
             $test = Spry::config()->tests[$test];
@@ -387,7 +387,7 @@ class SpryUtilities
 
             if (empty($test['expect'])) {
                 $result['status'] = 'Failed';
-                $responseCode = 550;
+                $responseCode = 50;
             } else {
                 $result['expect'] = $test['expect'];
 
@@ -415,7 +415,7 @@ class SpryUtilities
 
                     if (is_null($responseValue)) {
                         $result['status'] = 'Failed';
-                        $responseCode = 550;
+                        $responseCode = 50;
                     }
 
                     if ($expectCompare && !is_null($responseValue)) {
@@ -423,7 +423,7 @@ class SpryUtilities
                             case '!==':
                                 if ($responseValue === $expect) {
                                     $result['status'] = 'Failed';
-                                    $responseCode = 550;
+                                    $responseCode = 50;
                                 }
 
                                 break;
@@ -432,7 +432,7 @@ class SpryUtilities
                             case '!':
                                 if ($responseValue === $expect) {
                                     $result['status'] = 'Failed';
-                                    $responseCode = 550;
+                                    $responseCode = 50;
                                 }
 
                                 break;
@@ -441,7 +441,7 @@ class SpryUtilities
                             case '=<':
                                 if ($responseValue > $expect) {
                                     $result['status'] = 'Failed';
-                                    $responseCode = 550;
+                                    $responseCode = 50;
                                 }
 
                                 break;
@@ -450,7 +450,7 @@ class SpryUtilities
                             case '=>':
                                 if ($responseValue < $expect) {
                                     $result['status'] = 'Failed';
-                                    $responseCode = 550;
+                                    $responseCode = 50;
                                 }
 
                                 break;
@@ -458,7 +458,7 @@ class SpryUtilities
                             case '<':
                                 if ($responseValue >= $expect) {
                                     $result['status'] = 'Failed';
-                                    $responseCode = 550;
+                                    $responseCode = 50;
                                 }
 
                                 break;
@@ -466,7 +466,7 @@ class SpryUtilities
                             case '>':
                                 if ($responseValue <= $expect) {
                                     $result['status'] = 'Failed';
-                                    $responseCode = 550;
+                                    $responseCode = 50;
                                 }
 
                                 break;
@@ -475,7 +475,7 @@ class SpryUtilities
                             case '=':
                                 if ($responseValue !== $expect) {
                                     $result['status'] = 'Failed';
-                                    $responseCode = 550;
+                                    $responseCode = 50;
                                 }
 
                                 break;
@@ -484,7 +484,7 @@ class SpryUtilities
                             default:
                                 if ($responseValue !== $expect) {
                                     $result['status'] = 'Failed';
-                                    $responseCode = 550;
+                                    $responseCode = 50;
                                 }
 
                                 break;
@@ -494,6 +494,6 @@ class SpryUtilities
             }
         }
 
-        return Spry::response($responseCode, $result);
+        return Spry::response($result, $responseCode, $result['status'] === 'Passed' ? 'success' : 'error');
     }
 }
