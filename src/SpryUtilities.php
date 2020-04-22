@@ -237,7 +237,7 @@ class SpryUtilities
         $responseMeta = [];
 
         // Get Multiple - Set Default Totals
-        $total = $searchTotal = Spry::db($dbMeta)->count($table, $join, 'id', $where);
+        $total = $searchTotal = Spry::db($dbMeta)->count($table, $join, $table.'.id', $where);
 
         // If has Orderby then set Order
         if (!empty($meta['orderby']) && !empty($meta['order'])) {
@@ -250,7 +250,7 @@ class SpryUtilities
             foreach ($searchFields as $searchField) {
                 $where['OR'][$searchField.'[~]'] = $meta['search'];
             }
-            $searchTotal = Spry::db($dbMeta)->count($table, $join, 'id', $where);
+            $searchTotal = Spry::db($dbMeta)->count($table, $join, $table.'.id', $where);
         }
 
         $pagination = self::dbGetPagination($meta, $total, $searchTotal);
