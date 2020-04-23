@@ -371,10 +371,15 @@ class SpryUtilities
             'result' => [],
         ];
 
+        $headers = !empty($test['headers']) && is_array($test['headers']) ? $test['headers'] : [];
+        $headers[] = 'SpryTest: 1';
+
+        $params = !empty($test['params']) && is_array($test['params']) ? $test['params'] : [];
+
         $response = self::getRemoteResponse(
             Spry::config()->endpoint.$test['route'],
-            array_merge($test['params'], ['test_data' => 1]),
-            (!empty($test['headers']) ? $test['headers'] : false),
+            array_merge($params, ['test_data' => 1]),
+            $headers,
             $method
         );
 
