@@ -242,6 +242,8 @@ class SpryUtilities
         // If has Orderby then set Order
         if (!empty($meta['orderby']) && !empty($meta['order'])) {
             $where['ORDER'] = [$meta['orderby'] => $meta['order']];
+        } else {
+            $where['ORDER'] = [$table.'.id' => 'DESC'];
         }
 
         // If has Search then set Search Parameter and Fields to search on
