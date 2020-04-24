@@ -71,9 +71,23 @@ class SpryUtilities
             }
 
             $response = curl_exec($ch);
+            $error = curl_error($ch);
+            $info = curl_getinfo($ch);
             curl_close($ch);
 
-            return $response;
+            $messages = [];
+
+            if (empty($response)) {
+                if (!empty($error)) {
+                    $messages[] = $error;
+                }
+                if (empty($info['http_code'])) {
+                    $messages[] = 'Check that the URL ('.$url.') is working. If using Spry Test Server make sure it is runnning.';
+                    $response = null;
+                }
+            }
+
+            return Spry::response($response, 54, null, null, $messages);
         }
     }
 
@@ -385,7 +399,13 @@ class SpryUtilities
             $method
         );
 
-        $response = json_decode($response, true);
+        $additionalMessages = [];
+
+        if (empty($response->status) || $response->status !== 'success') {
+            $additionalMessages = $response->messages;
+        }
+
+        $response = json_decode($response->body, true);
 
         $result['full_response'] = $response;
 
@@ -501,6 +521,6 @@ class SpryUtilities
             }
         }
 
-        return Spry::response($result, $responseCode, $result['status'] === 'Passed' ? 'success' : 'error');
+        return Spry::response($result, $responseCode, $result['status'] === 'Passed' ? 'success' : 'error', null, $additionalMessages);
     }
 }
