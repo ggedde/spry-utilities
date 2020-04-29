@@ -227,7 +227,7 @@ class SpryUtilities
 
         $logs = Spry::db()->migrate($args);
 
-        return Spry::response(null, 30, null, null, $logs);
+        return Spry::response(!empty($logs) ? true : null, 30, null, null, $logs);
     }
 
 
