@@ -42,7 +42,7 @@ class SpryUtilities
      *
      * @access public
      *
-     * @return string
+     * @return object
      */
     public static function getRemoteResponse($url = '', $request = '', $headers = [], $method = 'POST')
     {
@@ -209,7 +209,7 @@ class SpryUtilities
      *
      * @access public
      *
-     * @return array
+     * @return object
      */
     public static function dbMigrate($args = [])
     {
@@ -244,7 +244,7 @@ class SpryUtilities
      *
      * @access public
      *
-     * @return array
+     * @return object
      */
     public static function dbPrepareSelect($table, $join = null, $where = [], $meta = [], $searchFields = [], $dbMeta = [])
     {
@@ -292,7 +292,7 @@ class SpryUtilities
      *
      * @access public
      *
-     * @return array
+     * @return object
      */
     public static function dbGetPagination($meta, $total, $searchTotal)
     {
@@ -322,7 +322,7 @@ class SpryUtilities
      * Extracts the Value from a multi-dementional array by string
      * format using "." as the array separator.
      *
-     * @param array $keyPath
+     * @param string $keyPath
      * @param array $array
      *
      * @access public
@@ -352,11 +352,11 @@ class SpryUtilities
     /**
      * Runs a test through the Remote Response
      *
-     * @param array $test
+     * @param array|string $test
      *
      * @access public
      *
-     * @return mixed
+     * @return object
      */
     public static function test($test = '')
     {
